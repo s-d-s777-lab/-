@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="uk"><head><meta charset="UTF-8"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#0a84ff"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Судноводій"><meta name="format-detection" content="telephone=no"><title>Тести судноводія</title><style>
 :root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#6b7280;--border:#e5e7eb;--accent:#0a84ff;--accent2:#0057d9;--green:#169b62;--greenbg:#e9f8f0;--red:#d92d20;--redbg:#fff0ef;--amber:#b7791f;--amberbg:#fff8e6;--shadow:0 8px 28px rgba(20,32,60,.08);--radius:20px}
 @media(prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#191c22;--text:#f5f7fa;--muted:#a3aab8;--border:#2a2f39;--accent:#409cff;--accent2:#7ab8ff;--green:#42d392;--greenbg:#123326;--red:#ff6b63;--redbg:#3a1919;--amber:#ffd166;--amberbg:#3b3118;--shadow:none}}
@@ -25,7 +25,7 @@
     }
   }
 
-  function save() { localStorage.setItem(STORE, JSON.stringify(state)); }
+  function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (_) {} }
   function qById(id) { return Q.find((q) => q.id === id); }
   function seen(q) { return !!state.seen[q.id]; }
   function selected(q) {
@@ -102,7 +102,7 @@
     }
 
     let q = qById(currentId);
-    if (!q || seen(q)) {
+    if (!q) {
       const u = Q.find((x) => !seen(x));
       if (u) { currentId = u.id; q = u; } else { render(); return; }
     }
@@ -217,7 +217,7 @@
   function renderMistakes() {
     const bad = Q.filter((q) => effectiveScorable(q) && selected(q) !== null && !isCorrect(q));
     const list = bad.map((q) => `<div class="card list-card"><div class="small muted">Питання ${q.id}</div><div class="qtext">${esc(q.text)}</div><div class="mini-answer bad"><b>Твоя:</b> ${esc(q.options[selected(q)])}</div><div class="mini-answer good"><b>Правильна:</b> ${esc(q.options[q.correct[0]])}</div></div>`).join('');
-    app.innerHTML = header() + `<div class="card hero"><h1>Помилки</h1><p>${bad.length ? `Тут зібрано ${bad.length} ${bad.length === 1 ? 'помилку' : 'помилок'}, щоб повторити їх окремо.` : 'Поки що немає жодної помилки.'}</p></div>${list || '<div class="empty">Відповідай на питання - помилки автоматично з'являться тут.</div>'}`;
+    app.innerHTML = header() + `<div class="card hero"><h1>Помилки</h1><p>${bad.length ? `Тут зібрано ${bad.length} ${bad.length === 1 ? 'помилку' : 'помилок'}, щоб повторити їх окремо.` : 'Поки що немає жодної помилки.'}</p></div>${list || `<div class="empty">Відповідай на питання - помилки автоматично з'являться тут.</div>`}`;
   }
 
   function renderStats() {
@@ -256,9 +256,6 @@
   }
 
   document.querySelectorAll('.nav button').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
-  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  }
   render();
 })();
 </script></body></html>
